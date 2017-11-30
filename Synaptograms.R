@@ -31,6 +31,10 @@ option_list <- list(
                  make_option(c("-p", "--params"), 
                              type='character', default=NULL,
                              help = "means file name",
+                             metavar="character"),
+                 make_option(c("-F", "--Fzero"), 
+                             type='character', default=NULL,
+                             help = "F0 file name",
                              metavar="character")
                              )
 
@@ -39,6 +43,7 @@ if(FALSE){
   opt$file <- "testing.csv.h5"
   opt$out <- "synTest"
   opt$params <- "params.csv"
+  opt$F0 <- 'F0Testing.csv'
 }
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -85,6 +90,23 @@ dimnames(dat) <- list(NULL, NULL, NULL, 1:dim(dat)[4], chan)
 #  }
 #}
 
+ff0 <- read.csv(opt$F0)
+F0 <- 
+  foreach(j = 1:dim(dat)[4]) %:%
+  foreach(i = 1:dim(dat)[5]) %do% {
+      f0 <- 
+        (sum(dat[,,,j,i]) - means[i])/sds[i]
+      f0 <- 
+}
+
+names(F0) <- 1:length(F0)
+for(i in 1:length(F0)){
+  names(F0[[i]]) <- chan
+}
+
+F0min <-min(Reduce(c, Reduce(c, F0)))
+F0max <-max(Reduce(c, Reduce(c, F0)))
+
 
 rr <- foreach(l = 1:dim(dat)[4]) %do% {
   r <- dat[,,,l,]
@@ -97,8 +119,19 @@ rr <- foreach(l = 1:dim(dat)[4]) %do% {
   colnames(mr) <- c("x", "y", "z", "ch", "value")
   mr$z <- mr$z - (max(mr$z) +1)/2
   ch <- mr$ch
-  mr$type <- ctype$type[ch]
-  mr
+  #mr$type <- ctype$type[ch]
+  #mr
+
+  F0z <- Reduce('rbind', 
+           lapply(names(F0[[l]]), 
+             function(n){
+             Fz <- mr[mr$ch == n,]
+             Fz$F0 <- as.numeric(F0[[l]][n])
+             Fz
+             }))
+  ch <- F0z$ch
+  F0z$type <- ctype$type[ch]
+  F0z
 }
 
 
@@ -218,6 +251,7 @@ for(k in 1:length(rr)){
   mr <- rr[[k]]
 
   pp <- list()
+  ppF0 <- list()
   ut <- unique(type)
   for(ui in 1:length(ut)){
     pp[[ui]] <- 
@@ -229,6 +263,17 @@ for(k in 1:length(rr)){
        scale_fill_gradient(low = "black", high = ut[ui]) + 
        th + 
        theme(legend.position = "none")
+
+    ppF0[[ui]] <- 
+      ggplot(mr[mr$type == ut[ui],],
+        aes(x,y, group = type, fill = F0)) +
+        geom_raster() + 
+        scale_y_reverse() + 
+        facet_grid(ch + F0 ~ type, labeller = label_both) +
+        scale_fill_gradient2(low = "darkorchid4", 
+                                mid = "gray99", 
+                                high = "darkorange3",
+                                midpoint = 0, limits=c(F0min, F0max)) + th
   }
 
   lay <- list()
@@ -237,15 +282,30 @@ for(k in 1:length(rr)){
   }
 
   lay <- Reduce('rbind', lay)
+
+  lz <- length(range(mr$z)[1]:range(mr$z)[2])
+  laysep <- c()
+  kj <- 1
+  for(i in seq(1,7,2)){
+    inner <- c()
+    for(j in 1:table(type)[kj]){
+      inner <- rbind(inner, c(rep(i, lz),rep(i+1,1)))
+    }
+  kj <- kj +1
+  laysep <- rbind(laysep, inner)
+  }
+
   
   cname <- 
     paste0(opt$out, sprintf("_Tsynaptogram_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
     
-  b = 1080
+  b = 200 * (dim(dat)[5] + 1)#1080
   w = b
   h = 1.25*b
   
   png(cname, width = w, height=h)
-  plot(grid.arrange(grobs = pp, layout_matrix = lay))
+  #plot(grid.arrange(grobs = pp, layout_matrix = lay))
+  grid.arrange(pp[[1]], ppF0[[1]], pp[[2]], ppF0[[2]], pp[[3]], ppF0[[3]], pp[[4]], ppF0[[4]], layout_matrix = laysep)
   dev.off()
+
 }
