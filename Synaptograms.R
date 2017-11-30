@@ -1,4 +1,4 @@
-#!usr/bin/env Rscript
+#!/usr/bin/env Rscript
 ###
 ### Rscript to plot synaptograms from
 ### hdf5 file 
@@ -28,15 +28,18 @@ option_list <- list(
                              type='character', default=NULL,
                              help = "output file name prefix",
                              metavar="character"),
-                 make_option(c("-m", "--means"), 
+                 make_option(c("-p", "--params"), 
                              type='character', default=NULL,
                              help = "means file name",
-                             metavar="character"),
-                 make_option(c("-s", "--sds"), 
-                             type='character', default=NULL,
-                             help = "sds file name",
                              metavar="character")
                              )
+
+if(FALSE){
+  opt <- list()
+  opt$file <- "testing.csv.h5"
+  opt$out <- "synTest"
+  opt$params <- "params.csv"
+}
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
@@ -55,11 +58,20 @@ dat <- h5read(input, name = name)
 chan <- h5read(input, name = 'Channels')
 H5close()
 
-type <- c("ot", "ot", "ot", 
-          'in', 'in', 'in','in',
-          'ex', 'ex', 'ex', 'ex', 'em')
+if(!is.null(opt$params)){
+  parms <- read.table(opt$params, header = TRUE, sep = ',', row.names = 1, stringsAsFactors=FALSE)
+} else {
+  parms <- t(data.frame(colors = rep(1,dim(dat)[5]), 
+                        means = rep(0,dim(dat)[5]),
+                        sds = rep(1,dim(dat)[5])))
+  colnames(parms) <- chan
+}
+
+type  <- as.character(parms[which(rownames(parms) == "colors"),])
+means <- as.numeric(parms[which(rownames(parms) == "means"),])
+sds   <- as.numeric(parms[which(rownames(parms) == "sds"),])
           
-ctype <- data.frame(chan, type=type)
+ctype <- data.frame(chan, type=type, stringsAsFactors = FALSE)
 
 dimnames(dat) <- list(NULL, NULL, NULL, 1:dim(dat)[4], chan)
 #if(FALSE){
@@ -134,70 +146,106 @@ th <- theme(axis.text = element_blank(), axis.ticks = element_blank(),
 #MMot <- max(sapply(rr, function(am){ max(am[am$type == "ot",]$value) }))
 
 
-P <- list()
+#P <- list()
+#for(k in 1:length(rr)){
+#  mr <- rr[[k]]
+#
+#  pem <- 
+#  ggplot(mr[mr$type == "em",], 
+#    aes(x,y, group = factor(type), fill = value)) +
+#    geom_raster() + 
+#    scale_y_reverse() + 
+#    facet_grid(ch ~ z, labeller = label_both) +
+#    #scale_fill_gradient(low = "black", high = "white", limits = c(mmem, MMem)) + th + 
+#    scale_fill_gradient(low = "black", high = "white") + th + 
+#    theme(legend.position = "none")
+#
+#
+#  pex <- 
+#  ggplot(mr[mr$type == "ex",], 
+#    aes(x,y, group = factor(type), fill = value)) +
+#    geom_raster() + 
+#    scale_y_reverse() + 
+#    facet_grid(ch ~ z, labeller = label_both) +
+#    #scale_fill_gradient(low = "black", high = "green", limits = c(mmex, MMex)) + th
+#    scale_fill_gradient(low = "black", high = "green") + th
+#  
+#  pin <- 
+#  ggplot(mr[mr$type == "in",], 
+#    aes(x,y, group = factor(type), fill = value)) +
+#    geom_raster() + 
+#    scale_y_reverse() + 
+#    facet_grid(ch ~ z, labeller = label_both) +
+#    #scale_fill_gradient(low = "black", high = "red", limits = c(mmin,MMin)) + th
+#    scale_fill_gradient(low = "black", high = "red") + th
+#  
+#  pot <- 
+#    ggplot(mr[mr$type == "ot",], 
+#    aes(x,y, group = factor(type), fill = value)) +
+#    geom_raster() +
+#    scale_y_reverse() + 
+#    facet_grid(ch ~ z, labeller = label_both) +
+#    #scale_fill_gradient(low = "black", high = "blue", limits = c(mmot,MMot)) + th
+#    scale_fill_gradient(low = "black", high = "blue") + th
+#
+#  lay <- rbind(
+#        matrix(1,table(type)['ot'],1),
+#        matrix(2,table(type)['in'],1), 
+#        matrix(3,table(type)['ex'],1), 
+#        matrix(4,table(type)['em'],1))
+#  
+#  
+#  ff <-  tempfile() 
+#  png(filename = ff)
+#  P[[k]] <- grid.arrange(pot, pin, pex, pem, layout_matrix = lay)
+#  dev.off()
+#  unlink(ff)
+#
+#  cname <- 
+#    paste0(opt$out, sprintf("_synaptogram_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
+#    
+#  b = 1080
+#  w = b
+#  h = 1.25*b
+#  
+#  png(cname, width = w, height=h)
+#  plot(P[[k]])
+#  dev.off()
+#}
+
+### Colors from params.csv
 for(k in 1:length(rr)){
   mr <- rr[[k]]
 
-  pem <- 
-  ggplot(mr[mr$type == "em",], 
-    aes(x,y, group = factor(type), fill = value)) +
-    geom_raster() + 
-    scale_y_reverse() + 
-    facet_grid(ch ~ z, labeller = label_both) +
-    #scale_fill_gradient(low = "black", high = "white", limits = c(mmem, MMem)) + th + 
-    scale_fill_gradient(low = "black", high = "white") + th + 
-    theme(legend.position = "none")
+  pp <- list()
+  ut <- unique(type)
+  for(ui in 1:length(ut)){
+    pp[[ui]] <- 
+      ggplot(mr[mr$type == ut[ui],],
+       aes(x,y, fill = value)) +
+       geom_raster() + 
+       scale_y_reverse() + 
+       facet_grid(ch ~ z, labeller = label_both) +
+       scale_fill_gradient(low = "black", high = ut[ui]) + 
+       th + 
+       theme(legend.position = "none")
+  }
 
+  lay <- list()
+  for(i in 1:length(as.numeric(table(type)))){
+      lay[[i]] <- matrix(i,table(type)[i],1)
+  }
 
-  pex <- 
-  ggplot(mr[mr$type == "ex",], 
-    aes(x,y, group = factor(type), fill = value)) +
-    geom_raster() + 
-    scale_y_reverse() + 
-    facet_grid(ch ~ z, labeller = label_both) +
-    #scale_fill_gradient(low = "black", high = "green", limits = c(mmex, MMex)) + th
-    scale_fill_gradient(low = "black", high = "green") + th
+  lay <- Reduce('rbind', lay)
   
-  pin <- 
-  ggplot(mr[mr$type == "in",], 
-    aes(x,y, group = factor(type), fill = value)) +
-    geom_raster() + 
-    scale_y_reverse() + 
-    facet_grid(ch ~ z, labeller = label_both) +
-    #scale_fill_gradient(low = "black", high = "red", limits = c(mmin,MMin)) + th
-    scale_fill_gradient(low = "black", high = "red") + th
-  
-  pot <- 
-    ggplot(mr[mr$type == "ot",], 
-    aes(x,y, group = factor(type), fill = value)) +
-    geom_raster() +
-    scale_y_reverse() + 
-    facet_grid(ch ~ z, labeller = label_both) +
-    #scale_fill_gradient(low = "black", high = "blue", limits = c(mmot,MMot)) + th
-    scale_fill_gradient(low = "black", high = "blue") + th
-
-  lay <- rbind(
-        matrix(1,table(type)['ot'],1),
-        matrix(2,table(type)['in'],1), 
-        matrix(3,table(type)['ex'],1), 
-        matrix(4,table(type)['em'],1))
-  
-  
-  ff <-  tempfile() 
-  png(filename = ff)
-  P[[k]] <- grid.arrange(pot, pin, pex, pem, layout_matrix = lay)
-  dev.off()
-  unlink(ff)
-
   cname <- 
-    paste0(opt$out, sprintf("_synaptogram_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
+    paste0(opt$out, sprintf("_Tsynaptogram_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
     
   b = 1080
   w = b
   h = 1.25*b
   
   png(cname, width = w, height=h)
-  plot(P[[k]])
+  plot(grid.arrange(grobs = pp, layout_matrix = lay))
   dev.off()
 }
-

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #C='collman'
 #E='collman14v2'
@@ -12,19 +12,19 @@
 #getCube=true
 #genSynaptograms=true
 
-. ./home/config.conf
+. ./config.conf
 
 if $getCube
 then
   echo "Downloading cubes"
-  python3 getCubes.py -C $COLL -E $EXP -F $FM -B $BUFF -L /home/$LOC -O /home/$OUT --con /home/$CON
+  getCubes.py -C $COLL -E $EXP -F $FM -B $BUFF -L /home/$LOC -O /home/$OUT --con /home/$CON
   echo "Done"
 fi
 
 if $genSynaptograms
 then
   echo "Generating synaptograms"
-  Rscript Synaptograms.R -f /home/$SYIN -o /home/$SYOUT
+  Synaptograms.R -f $SYIN -o $SYOUT -p $PARAM
   echo "Done"
 fi
 

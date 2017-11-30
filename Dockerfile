@@ -43,16 +43,16 @@ RUN pip3 install --upgrade requests  \
   
 RUN apt-get install -y python3-tk
 
-COPY ./run.sh  /run.sh
-COPY ./toolbox.py  /toolbox.py
-COPY ./getCubes.py /getCubes.py
-COPY ./Synaptograms.R /Synaptograms.R
+COPY ./run.sh  /bin/run.sh
+COPY ./toolbox.py  /bin/toolbox.py
+COPY ./getCubes.py /bin/getCubes.py
+COPY ./Synaptograms.R /bin/Synaptograms.R
 
-RUN chmod +x /toolbox.py & \
-    chmod +x /getCubes.py & \
-    chmod +x /run.sh & \
-    chmod +x /Synaptograms.R
+RUN chmod +x /bin/toolbox.py & \
+    chmod +x /bin/getCubes.py & \
+    chmod +x /bin/run.sh & \
+    chmod +x /bin/Synaptograms.R
 
-
-ENTRYPOINT ["/run.sh"]
+WORKDIR /home
+ENTRYPOINT ["run.sh"]
 
