@@ -50,8 +50,8 @@ COPY ./Synaptograms.R /bin/Synaptograms.R
 
 RUN chmod +x /bin/toolbox.py & \
     chmod +x /bin/getCubes.py & \
-    chmod +x /bin/run.sh & \
-    chmod +x /bin/Synaptograms.R
+    chmod +x /bin/Synaptograms.R & \
+    chmod +x /bin/run.sh
 
 WORKDIR /home
 ENTRYPOINT ["run.sh"]
