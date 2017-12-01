@@ -35,6 +35,10 @@ option_list <- list(
                  make_option(c("-F", "--Fzero"), 
                              type='character', default=NULL,
                              help = "F0 file name",
+                             metavar="character"),
+                 make_option(c("-L", "--links"),
+                             type='logical', default=FALSE,
+                             help = "F0 file name",
                              metavar="character")
                              )
 
@@ -303,5 +307,6 @@ for(k in 1:length(rr)){
   #plot(grid.arrange(grobs = pp, layout_matrix = lay))
   grid.arrange(pp[[1]], ppF0[[1]], pp[[2]], ppF0[[2]], pp[[3]], ppF0[[3]], pp[[4]], ppF0[[4]], layout_matrix = laysep)
   dev.off()
+  gc()
 
 }

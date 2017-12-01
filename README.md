@@ -69,11 +69,13 @@ the feature names.
 The means and standard deviations are used to scale each feature F0
 value before plotting. 
 
-|"names"| bIIItubulin|   ...|VGluT1|EM10K|
+
+|"names"| bIIItubulin|...|VGluT1|EM10K|
 |-------|------------|:----:|------------|
 |"colors"|"blue"|...|"green"|"white"|
 |"means"| 2120026.746139|...|1396392.87548263|0|
 |"sds"| 848444.631131951|...|524801.872574875|NA|
+
 
 # Usage
 
