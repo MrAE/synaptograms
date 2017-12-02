@@ -44,7 +44,7 @@ option_list <- list(
 
 if(FALSE){
   opt <- list()
-  opt$file <- "testing.csv.h5"
+  opt$file <- "test.csv.h5"
   opt$out <- "synTest"
   opt$params <- "params.csv"
 }
@@ -96,7 +96,8 @@ F0 <-
   foreach(j = 1:dim(dat)[4]) %:%
   foreach(i = 1:dim(dat)[5]) %do% {
       f0 <- 
-        (sum(dat[,,,j,i]) - means[i])/sds[i]
+        round(
+        (sum(dat[,,,j,i]) - means[i])/sds[i], 2)
 }
 
 names(F0) <- 1:length(F0)
@@ -106,7 +107,6 @@ for(i in 1:length(F0)){
 
 F0min <-min(Reduce(c, Reduce(c, F0)), na.rm = TRUE)
 F0max <-max(Reduce(c, Reduce(c, F0)), na.rm = TRUE)
-
 
 rr <- foreach(l = 1:dim(dat)[4]) %do% {
   r <- dat[,,,l,]
@@ -119,8 +119,6 @@ rr <- foreach(l = 1:dim(dat)[4]) %do% {
   colnames(mr) <- c("x", "y", "z", "ch", "value")
   mr$z <- mr$z - (max(mr$z) +1)/2
   ch <- mr$ch
-  #mr$type <- ctype$type[ch]
-  #mr
 
   F0z <- Reduce('rbind', 
            lapply(names(F0[[l]]), 
@@ -138,113 +136,37 @@ rr <- foreach(l = 1:dim(dat)[4]) %do% {
 th <- theme(axis.text = element_blank(), axis.ticks = element_blank(),
             axis.title.y = element_blank(), axis.title.x = element_blank(),
             legend.position="none", legend.key.size = unit(2,'lines'),
-            panel.spacing = unit(0, "lines"))
+            panel.spacing = unit(0, "lines"), strip.text=element_text(size = 18))
 
-#pg <- list()
-#for(i in 1:length(rr)){
-#  pdat <- rr[[i]]
-#  pg[[i]] <- 
-#    ggplot(pdat, 
-#    aes(x,y, group = ch, fill = value)) +
-#    geom_raster() + 
-#    scale_y_reverse() + 
-#    facet_grid(ch ~ z, labeller = label_both) +
-#    #scale_fill_gradient(low = "black", high = "green") + th
-#    scale_fill_gradient(low = "black", high = "white") + th
-#} 
-#
-#
-##pdf("collman14v2_synaptograms.pdf", width = 12, height = 12)
-#for(i in 1:length(pg)){
-#  plot(pg[[i]])
-#  #Sys.sleep(3)
-#}
-##dev.off()
-#
-#
-#for(k in 1:length(rr)){
-#  mr <- rr[[k]]
-#  pex <- 
-#  ggplot(mr[mr$type == "ex",], 
-#  mr
-#}
+th2 <- theme(axis.text = element_blank(), axis.ticks = element_blank(),
+            axis.title.y = element_blank(), axis.title.x = element_blank(),
+            legend.position="none", legend.key.size = unit(2,'lines'),
+            panel.spacing = unit(0, "lines"), strip.text.x = element_blank(), 
+            strip.text=element_text(size = 18))
 
-#mmem <- min(sapply(rr, function(am){ min(am[am$type == "em",]$value) }))
-#MMem <- max(sapply(rr, function(am){ max(am[am$type == "em",]$value) }))
-#mmex <- min(sapply(rr, function(am){ min(am[am$type == "ex",]$value) }))
-#MMex <- max(sapply(rr, function(am){ max(am[am$type == "ex",]$value) }))
-#mmin <- min(sapply(rr, function(am){ min(am[am$type == "in",]$value) }))
-#MMin <- max(sapply(rr, function(am){ max(am[am$type == "in",]$value) }))
-#mmot <- min(sapply(rr, function(am){ min(am[am$type == "ot",]$value) }))
-#MMot <- max(sapply(rr, function(am){ max(am[am$type == "ot",]$value) }))
+lay <- list()
+for(i in 1:length(as.numeric(table(type)))){
+    lay[[i]] <- matrix(i,table(type)[i],1)
+}
 
+lay <- Reduce('rbind', lay)
 
-#P <- list()
-#for(k in 1:length(rr)){
-#  mr <- rr[[k]]
-#
-#  pem <- 
-#  ggplot(mr[mr$type == "em",], 
-#    aes(x,y, group = factor(type), fill = value)) +
-#    geom_raster() + 
-#    scale_y_reverse() + 
-#    facet_grid(ch ~ z, labeller = label_both) +
-#    #scale_fill_gradient(low = "black", high = "white", limits = c(mmem, MMem)) + th + 
-#    scale_fill_gradient(low = "black", high = "white") + th + 
-#    theme(legend.position = "none")
-#
-#
-#  pex <- 
-#  ggplot(mr[mr$type == "ex",], 
-#    aes(x,y, group = factor(type), fill = value)) +
-#    geom_raster() + 
-#    scale_y_reverse() + 
-#    facet_grid(ch ~ z, labeller = label_both) +
-#    #scale_fill_gradient(low = "black", high = "green", limits = c(mmex, MMex)) + th
-#    scale_fill_gradient(low = "black", high = "green") + th
-#  
-#  pin <- 
-#  ggplot(mr[mr$type == "in",], 
-#    aes(x,y, group = factor(type), fill = value)) +
-#    geom_raster() + 
-#    scale_y_reverse() + 
-#    facet_grid(ch ~ z, labeller = label_both) +
-#    #scale_fill_gradient(low = "black", high = "red", limits = c(mmin,MMin)) + th
-#    scale_fill_gradient(low = "black", high = "red") + th
-#  
-#  pot <- 
-#    ggplot(mr[mr$type == "ot",], 
-#    aes(x,y, group = factor(type), fill = value)) +
-#    geom_raster() +
-#    scale_y_reverse() + 
-#    facet_grid(ch ~ z, labeller = label_both) +
-#    #scale_fill_gradient(low = "black", high = "blue", limits = c(mmot,MMot)) + th
-#    scale_fill_gradient(low = "black", high = "blue") + th
-#
-#  lay <- rbind(
-#        matrix(1,table(type)['ot'],1),
-#        matrix(2,table(type)['in'],1), 
-#        matrix(3,table(type)['ex'],1), 
-#        matrix(4,table(type)['em'],1))
-#  
-#  
-#  ff <-  tempfile() 
-#  png(filename = ff)
-#  P[[k]] <- grid.arrange(pot, pin, pex, pem, layout_matrix = lay)
-#  dev.off()
-#  unlink(ff)
-#
-#  cname <- 
-#    paste0(opt$out, sprintf("_synaptogram_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
-#    
-#  b = 1080
-#  w = b
-#  h = 1.25*b
-#  
-#  png(cname, width = w, height=h)
-#  plot(P[[k]])
-#  dev.off()
-#}
+lz <- length(range(mr$z)[1]:range(mr$z)[2])
+laysep <- c()
+kj <- 1
+for(i in seq(1,7,2)){
+  inner <- c()
+  for(j in 1:table(type)[kj]){
+    inner <- rbind(inner, c(rep(i, lz),rep(i+1,1)))
+  }
+kj <- kj +1
+laysep <- rbind(laysep, inner)
+}
+
+b <- 100 * (dim(dat)[5] + 1)#1080
+w <- b
+h <- 1.25*b
+  
 
 ### Colors from params.csv
 for(k in 1:length(rr)){
@@ -259,52 +181,31 @@ for(k in 1:length(rr)){
        aes(x,y, fill = value)) +
        geom_raster() + 
        scale_y_reverse() + 
-       facet_grid(ch ~ z, labeller = label_both) +
+       facet_grid(ch ~ z) +
        scale_fill_gradient(low = "black", high = ut[ui]) + 
-       th + 
-       theme(legend.position = "none")
+       annotate('segment', x =108.5, xend = 108.5, 
+                y = 0, yend = 217,color='white', alpha = 0.27) +
+       annotate('segment', x =0, xend = 217, 
+               y = 108.5, yend = 108.5, color='white', alpha = 0.27) + 
+       th2
 
     ppF0[[ui]] <- 
       ggplot(mr[mr$type == ut[ui],],
         aes(x,y, group = type, fill = F0)) +
         geom_raster() + 
         scale_y_reverse() + 
-        facet_grid(ch + F0 ~ type, labeller = label_both) +
+        facet_grid(F0 ~ type) +
         scale_fill_gradient2(low = "darkorchid4", 
                                 mid = "gray99", 
                                 high = "darkorange3",
-                                midpoint = 0, limits=c(F0min, F0max)) + th
+                                midpoint = 0, limits=c(F0min, F0max)) + th + 
+        theme(strip.text.x = element_blank())
   }
 
-  lay <- list()
-  for(i in 1:length(as.numeric(table(type)))){
-      lay[[i]] <- matrix(i,table(type)[i],1)
-  }
-
-  lay <- Reduce('rbind', lay)
-
-  lz <- length(range(mr$z)[1]:range(mr$z)[2])
-  laysep <- c()
-  kj <- 1
-  for(i in seq(1,7,2)){
-    inner <- c()
-    for(j in 1:table(type)[kj]){
-      inner <- rbind(inner, c(rep(i, lz),rep(i+1,1)))
-    }
-  kj <- kj +1
-  laysep <- rbind(laysep, inner)
-  }
-
-  
   cname <- 
     paste0(opt$out, sprintf("_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
     
-  b = 100 * (dim(dat)[5] + 1)#1080
-  w = b
-  h = 1.25*b
-  
   png(cname, width = w, height=h)
-  #plot(grid.arrange(grobs = pp, layout_matrix = lay))
   grid.arrange(pp[[1]], ppF0[[1]], pp[[2]], ppF0[[2]], pp[[3]], ppF0[[3]], pp[[4]], ppF0[[4]], layout_matrix = laysep)
   dev.off()
   gc()
