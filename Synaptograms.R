@@ -211,7 +211,7 @@ for(k in 1:length(rr)){
     paste0(opt$out, sprintf("_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
     
   png(cname, width = w, height=h)
-    grid.arrange(grobs = P, layout_matrix = laysep)
+    grid.arrange(grobs = pp, layout_matrix = laysep)
   dev.off()
   gc()
 }
