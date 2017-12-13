@@ -148,17 +148,18 @@ th2 <- theme(axis.text = element_blank(), axis.ticks = element_blank(),
 
 lay <- list()
 for(i in 1:length(as.numeric(table(type)))){
-    lay[[i]] <- matrix(i,table(type)[i],1)
+    lay[[i]] <- matrix(i,table(type)[ut[i]],1)
 }
 
 lay <- Reduce('rbind', lay)
+
 
 lz <- length(range(mr$z)[1]:range(mr$z)[2])
 laysep <- c()
 kj <- 1
 for(i in seq(1,2*length(ut),2)){
   inner <- c()
-  for(j in 1:table(type)[kj]){
+  for(j in 1:table(type)[ut[kj]]){
     inner <- rbind(inner, c(rep(i, lz),rep(i+1,1)))
   }
 kj <- kj +1
