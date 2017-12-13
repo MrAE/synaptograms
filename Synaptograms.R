@@ -46,7 +46,7 @@ if(FALSE){
   opt <- list()
   opt$file <- "test.csv.h5"
   opt$out <- "synTest"
-  opt$params <- "params.csv"
+  opt$params <- "collman15fauxparams.csv"
 }
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -59,6 +59,7 @@ opt <- parse_args(opt_parser)
 
 input <- opt$file
 
+h5ls(input) ## DEBUG
 name <- h5ls(input)$name[grep("cube", h5ls(input)$name)]
 loc <- h5read(input, name = 'Locations')
 dat <- h5read(input, name = name)
@@ -155,7 +156,7 @@ lay <- Reduce('rbind', lay)
 lz <- length(range(mr$z)[1]:range(mr$z)[2])
 laysep <- c()
 kj <- 1
-for(i in seq(1,7,2)){
+for(i in seq(1,2*length(ut),2)){
   inner <- c()
   for(j in 1:table(type)[kj]){
     inner <- rbind(inner, c(rep(i, lz),rep(i+1,1)))
