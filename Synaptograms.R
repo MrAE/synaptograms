@@ -75,6 +75,7 @@ if(!is.null(opt$params)){
 }
 
 type  <- as.character(parms[which(rownames(parms) == "colors"),])
+ut <- unique(type)
 means <- as.numeric(parms[which(rownames(parms) == "means"),])
 sds   <- as.numeric(parms[which(rownames(parms) == "sds"),])
           
@@ -174,7 +175,6 @@ for(k in 1:length(rr)){
 
   pp <- list()
   ppF0 <- list()
-  ut <- unique(type)
   for(ui in 1:length(ut)){
     pp[[ui]] <- 
       ggplot(mr[mr$type == ut[ui],],
@@ -201,13 +201,17 @@ for(k in 1:length(rr)){
                                 midpoint = 0, limits=c(F0min, F0max)) + th + 
         theme(strip.text.x = element_blank())
   }
+  
+  idx <- order(c(seq_along(pp), seq_along(ppF0)))
+  pp <- (c(pp,ppF0))[idx]
+  rm(ppF0)
+  gc()
 
   cname <- 
     paste0(opt$out, sprintf("_x%d_y%d_z%d.png", loc[k,1], loc[k,2], loc[k,3]))
     
   png(cname, width = w, height=h)
-  grid.arrange(pp[[1]], ppF0[[1]], pp[[2]], ppF0[[2]], pp[[3]], ppF0[[3]], pp[[4]], ppF0[[4]], layout_matrix = laysep)
+    grid.arrange(grobs = P, layout_matrix = laysep)
   dev.off()
   gc()
-
 }
