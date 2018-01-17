@@ -46,7 +46,7 @@ if(FALSE){
   opt <- list()
   opt$file <- "test.csv.h5"
   opt$out <- "synTest"
-  opt$params <- "collman15fauxparams.csv"
+  opt$params <- "rorbParams.csv"
 }
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -185,10 +185,12 @@ for(k in 1:length(rr)){
        scale_y_reverse() + 
        facet_grid(ch ~ z) +
        scale_fill_gradient(low = "black", high = ut[ui]) + 
-       annotate('segment', x =108.5, xend = 108.5, 
-                y = 0, yend = 217,color='white', alpha = 0.27) +
-       annotate('segment', x =0, xend = 217, 
-               y = 108.5, yend = 108.5, color='white', alpha = 0.27) + 
+       # y-axis
+       annotate('segment', x =dim(dat)[1]/2, xend = dim(dat)[1]/2, 
+                y = 0, yend = dim(dat)[1],color='white', alpha = 0.27) +
+       # x-axis
+       annotate('segment', x =0, xend = dim(dat)[2], 
+               y = dim(dat)[2]/2, yend = dim(dat)[2]/2, color='white', alpha = 0.27) + 
        th2
 
     ppF0[[ui]] <- 
