@@ -44,8 +44,12 @@ option_list <- list(
 
 if(FALSE){
   opt <- list()
-  opt$file <- "test.csv.h5"
-  opt$out <- "synTest"
+  opt$file <- "emtest.csv.h5"
+  opt$out <- "emTest"
+  opt$params <- "rorbParams.csv"
+
+  opt$file <- "attest.csv.h5"
+  opt$out <- "atTest"
   opt$params <- "rorbParams.csv"
 }
 
@@ -69,7 +73,7 @@ H5close()
 if(!is.null(opt$params)){
   parms <- read.table(opt$params, header = TRUE, sep = ',', row.names = 1, stringsAsFactors=FALSE)
 } else {
-  parms <- t(data.frame(colors = rep(1,dim(dat)[5]), 
+  parms <- t(data.frame(colors = rep("white",dim(dat)[5]), 
                         means = rep(0,dim(dat)[5]),
                         sds = rep(1,dim(dat)[5])))
   colnames(parms) <- chan
